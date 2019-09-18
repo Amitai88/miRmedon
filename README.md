@@ -33,20 +33,21 @@ or
 # Usage
 **Parameters** \
 **miRmedon takes the following parameters:**
-- -f - path to fastq file
-- -star – path to STAR 
-- -samtools – path to samtools
-- -mafft – path to mafft 
-- -seqmap – path to seqmap
-- -bowtie – path to bowtie
-- -G – path to GRCh38.p12 fasta file or GRCh38.p12 Bowtie index
-- -T – path to gencode.v31.transcripts fasta file or gencode.v31.transcripts Bowtie index
-- -t – number of threads to run STAR
-- -s – number of soft-clipped bases threshold (default = 2)
-- -x – total number of modifications (soft-clipping and mismatches) threshold (default = 3)
-- -c – read counts threshold (default = 10)
-- -r – number of resamples for Monte-Carlo p-value estimation (default = 10000)
-
+```
+-f - path to fastq file
+-star – path to STAR 
+-samtools – path to samtools
+-mafft – path to mafft 
+-seqmap – path to seqmap
+-bowtie – path to bowtie
+-G – path to GRCh38.p12 fasta file or GRCh38.p12 Bowtie index
+-T – path to gencode.v31.transcripts fasta file or gencode.v31.transcripts Bowtie index
+-t – number of threads to run STAR
+-s – number of soft-clipped bases threshold (default = 2)
+-x – total number of modifications (soft-clipping and mismatches) threshold (default = 3)
+-c – read counts threshold (default = 10)
+-r – number of resamples for Monte-Carlo p-value estimation (default = 10000)
+```
 **Note**
 - Only one tool is required for consensus sequence alignment (see paper). Currently, Seqmap and Bowtie are implemented in miRmedon. 
 Please indicate the path for one alignment tool, and leave the additional path parameter empty. If Seqmap paramter was indicated,
@@ -55,15 +56,18 @@ However, if bowtie paramter was indicated, -G and -T should point on bowtie indi
 respectively.
 
 **Command line examples** \
-In order to apply miRmedon with default paramters and Bowtie, use the following command line example: \
-python3 miRmedon.py **-f** _path to fastq file_ **-star** _path to star_ **-t** _number of threads_ **-samtools** _path to samtools_
-**-mafft** _path to mafft_ **-bowtie** _path to bowtie_ **-G** _path to GRCh38.p12.genome bowtie index_ **-T** 
-_path to  bowtie gencode.v31.transcripts bowtie index_
 
-In order to apply miRmedon with default paramters and Seqmap, use the following command line example: \
-python3 miRmedon.py **-f** _path to fastq file_ **-star** _path to star_ **-t** _number of threads_ **-samtools** _path to samtools_
-**-mafft** _path to mafft_ **-seqmap** _path to seqmap **-G** _path to GRCh38.p12.genome.fa_ **-T** 
-_path to  bowtie gencode.v31.transcripts.fa_
+In order to apply miRmedon with default paramters and Bowtie, use the following command line example: 
+```
+python3 miRmedon.py -f path_to_fastq_file -star path_to_star -t number_of_threads -samtools path_to_samtools
+-mafft path_to_mafft -bowtie path_to_bowtie -G path_to_GRCh38.p12.genome_bowtie_index -T path_to_bowtie_gencode.v31.transcripts_bowtie_index
+```
+
+In order to apply miRmedon with default paramters and Seqmap, use the following command line example: 
+```
+python3 miRmedon.py -f path_to_fastq_file -star path_to_star -t number_of_threads -samtools path_to_samtools
+-mafft path_to_mafft -seqmap path_to_seqmap -G path_to_GRCh38.p12.genome.fa -T path_to_gencode.v31.transcripts.fa
+```
 
 # Output
 miRmedon will generate two tab-delimited report files: 
