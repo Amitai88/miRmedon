@@ -55,7 +55,7 @@ Please indicate the path for one alignment tool, and leave the additional path p
 However, if bowtie paramter was indicated, -G and -T should point on bowtie indices for GRCh38.p12.genome.fa and gencode.v31.transcripts.fa
 respectively.
 
-**Command line examples** \
+**Command line examples** 
 
 In order to apply miRmedon with default paramters and Bowtie, use the following command line example: 
 ```
