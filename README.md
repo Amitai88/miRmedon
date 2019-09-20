@@ -6,7 +6,7 @@ miRmedon it's a python3 code which takes fastq file of trimmed small-RNA reads, 
 detected in the data. In addition, miRmedon reports on read counts and sequence of both edited and non-edited miRNAs. 
 miRmedon require several extrenal softwares and python libraries, as descirbed below.
 
-For detailed description see _link to bioRxiv_
+For detailed description see https://www.biorxiv.org/content/10.1101/774661v1
 
 # Installation
 No installation is required for miRmedon. Please directly use miRmedon.py source file and make sure it is located within the  
