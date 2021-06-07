@@ -13,7 +13,7 @@ def length_filter(e_miRbase_path):
         miR = title[:title.find('_')]
         ref_seq = e_miRbase[miR][title]['sequence']
         rel_len = len(seq)/len(ref_seq)
-        if 0.9 <= rel_len <= 1.1:
+        if 0.95 <= rel_len <= 1.05:
             consensus_file.write('>' + title + '\n' + seq + '\n')
         else:
             unvalids_file.write(title + '\t' + 'Consensus sequence too short/long' + '\n')
@@ -90,6 +90,7 @@ def filter_genome_aligned_haplotypes(path_to_bowtie,
                 elif mismatches == 0:
                     unvalid_genome_aligned.append(haplotype)
             genome_aligned_haplotypes.add(haplotype)
+
     return genome_aligned_haplotypes, unvalid_genome_aligned
 
 
@@ -108,9 +109,12 @@ def filter_transcriptome_aligned_haplotypes(path_to_bowtie,
                 if haplotype not in haplotypes_to_skip:
                     out_file.write(line + next(in_file))
     alignment_to_transcriptome(path_to_bowtie=path_to_bowtie, path_to_transcriptome=path_to_transcriptome)
-    transcriptome_aligned_haplotypes = list(set([line.split('\t')[3] for line in 
-                                                 open('transcriptome.eland', 'r')
-                                                 if not line.startswith('trans_id')]))
+    try:
+        transcriptome_aligned_haplotypes = list(set([line.split('\t')[3] for line in 
+                                                     open('transcriptome.eland', 'r')
+                                                     if not line.startswith('trans_id')]))
+    except FileNotFoundError:
+        transcriptome_aligned_haplotypes = []
     return transcriptome_aligned_haplotypes
 
 
@@ -135,7 +139,7 @@ def BAM_filter_aligned(filt_bycount_bam, path_to_samtools):
     final_filt_bam = filt_bycount_bam[:filt_bycount_bam.find('.filt.bycount.bam')] + '.filt.final.bam'
     os.system('cut -f 1 unvalids.txt > unvalids_k1.txt')
     os.system(
-        "{} view -h {} | grep -v -w -F -f unvalids_k1.txt | samtools view -Sb > {}".format(path_to_samtools, filt_bycount_bam, final_filt_bam))
+        "{} view -h {} | grep -v -w -F -f unvalids_k1.txt | {} view -Sb > {}".format(path_to_samtools, filt_bycount_bam, path_to_samtools, final_filt_bam))
     os.system('rm -rf unvalids_k1.txt')
 
 

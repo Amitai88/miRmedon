@@ -21,11 +21,13 @@ if __name__ == '__main__':
                         help='Path to fastq file')
     parser.add_argument('-star', '-star', type=str,
                         help='Path to Star')
+    parser.add_argument('-star_ref_dir', '-star_ref_dir', type=str,
+                        help='Path to STAR e_miRbase ref directory')
     parser.add_argument('-t', '-threads', type=str,
                         help='Number of threads for Star alignment')
     parser.add_argument('-s', '-soft_clipping_threshold', type=int, default=2,
                         help='Soft-cliiped bases threshold')
-    parser.add_argument('-x', '-total_modifications_threshold', type=int, default=2,
+    parser.add_argument('-x', '-total_modifications_threshold', type=int, default=3,
                         help='Total number of modifications threshold (sofft-clipped+mismatches')
     parser.add_argument('-c', '-counts_threshold', type=int, default=10,
                         help='Counts threshold')
@@ -73,7 +75,7 @@ if __name__ == '__main__':
     bycount_filt_bam = '_Aligned.out.filt.bycount.bam'
     final_filt_bam = '_Aligned.out.filt.final.bam'
 
-    alignment_to_emiRbase(fastq_file, path_to_star, threads, star_ref_dir)
+    alignment_to_emiRbase(fastq_file, path_to_star, threads, star_ref_dir, path_to_samtools)
     main_alignments_filter(bam, e_miRbase, soft_clip_thresh, total_mod_thresh)
     main_counts_filter(st_filt_bam, path_to_samtools, counts_thresh)
     consensus_generator(bycount_filt_bam, path_to_mafft, path_to_samtools)
@@ -87,10 +89,10 @@ if __name__ == '__main__':
     monte_catlo_p_estimation(final_filt_bam, e_miRbase, resamples)
     recount(e_miRbase)
 
-    os.system('rm -rf _Log.final.out _Log.out _Log.progress.out _Unmapped.out.mate1 _SJ.out.tab')
-    os.system('rm -rf _Aligned.out.*')
-    os.system('rm -rf *.sam')
-    os.system('rm -rf *.eland')
-    os.system('rm -rf consensus.fasta reduced_consensus.fasta')
-    os.system('rm -rf counts.txt')
-    os.system('mv crt_counts.txt counts.txt')
+#    os.system('rm -rf _Log.final.out _Log.out _Log.progress.out _Unmapped.out.mate1 _SJ.out.tab')
+#    os.system('rm -rf _Aligned.out.*')
+#    os.system('rm -rf *.sam')
+#    os.system('rm -rf *.eland')
+#    os.system('rm -rf consensus.fasta reduced_consensus.fasta')
+#    os.system('rm -rf counts.txt')
+#    os.system('mv crt_counts.txt counts.txt')

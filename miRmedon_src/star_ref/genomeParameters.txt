@@ -1,7 +1,7 @@
-### /gpfs0/alal/projects/utils/STAR-2.6.0a/bin/Linux_x86_64/STAR   --runMode genomeGenerate   --runThreadN 16   --genomeDir /gpfs0/alal/users/mordeami/miRNA_editing_framework/final/e_miRbase/ref/   --genomeFastaFiles /gpfs0/alal/users/mordeami/miRNA_editing_framework/final/e_miRbase/e_miRbase.fasta      --genomeSAindexNbases 10   --genomeChrBinNbits 5   --limitGenomeGenerateRAM 223663384618
+### /gpfs0/alal/projects/utils/STAR-2.6.0a/bin/Linux_x86_64/STAR   --runMode genomeGenerate   --runThreadN 16   --genomeDir /gpfs0/alal/users/mordeami/miRNA_editing_framework/specificity_analysis/A_G/ref/   --genomeFastaFiles /gpfs0/alal/users/mordeami/miRNA_editing_framework/specificity_analysis/A_G/e_miRbase.fasta      --genomeSAindexNbases 10   --genomeChrBinNbits 5   --limitGenomeGenerateRAM 223663384618
 ### GstrandBit 
 versionGenome	20201
-genomeFastaFiles	/gpfs0/alal/users/mordeami/miRNA_editing_framework/final/e_miRbase/e_miRbase.fasta 
+genomeFastaFiles	/gpfs0/alal/users/mordeami/miRNA_editing_framework/specificity_analysis/A_G/e_miRbase.fasta 
 genomeSAindexNbases	10
 genomeChrBinNbits	5
 genomeSAsparseD	1
@@ -13,4 +13,4 @@ sjdbGTFfeatureExon	exon
 sjdbGTFtagExonParentTranscript	transcript_id
 sjdbGTFtagExonParentGene	gene_id
 sjdbInsertSave	Basic
-genomeFileSizes	6525472 37210770
+genomeFileSizes	4276416 24480204

@@ -21,7 +21,7 @@ def length_filter(e_miRbase_path):
 
 
 def alignment_to_genome(path_to_bowtie, path_to_genome_index):
-    os.system('{} -a --best -S -v 1 --sam-RG MD {} -f consensus.fasta > genome.sam'.format(path_to_bowtie, path_to_genome_index))
+    os.system('{} -a --best -S -v 1 --no-unal --sam-RG MD {} -f consensus.fasta > genome.sam'.format(path_to_bowtie, path_to_genome_index))
     return None
 
 
@@ -103,9 +103,12 @@ def filter_transcriptome_aligned_haplotypes(path_to_bowtie,
                     out_file.write(line + next(in_file))
     alignment_to_transcriptome(path_to_bowtie=path_to_bowtie, path_to_transcriptome_index=path_to_transcriptome_index)
     os.system('{} view transcriptome.sam > transcriptome.nohead.sam'.format(path_to_samtools))
-    transcriptome_aligned_haplotypes = list(set([line.split('\t')[0] for line in
-                                                 open('transcriptome.nohead.sam', 'r')
-                                                 if int(line.split('\t')[1]) != 4]))
+    try:
+        transcriptome_aligned_haplotypes = list(set([line.split('\t')[0] for line in
+                                                     open('transcriptome.nohead.sam', 'r')
+                                                     if int(line.split('\t')[1]) != 4]))
+    except FileNotFoundError:
+        transcriptome_aligned_haplotypes = []
     return transcriptome_aligned_haplotypes
 
 
@@ -133,7 +136,7 @@ def BAM_filter_aligned(filt_bycount_bam, path_to_samtools):
     final_filt_bam = filt_bycount_bam[:filt_bycount_bam.find('.filt.bycount.bam')] + '.filt.final.bam'
     os.system('cut -f 1 unvalids.txt > unvalids_k1.txt')
     os.system(
-        "{} view -h {} | grep -v -w -F -f unvalids_k1.txt | samtools view -Sb > {}".format(path_to_samtools, filt_bycount_bam, final_filt_bam))
+        "{} view -h {} | grep -v -w -F -f unvalids_k1.txt | {} view -Sb > {}".format(path_to_samtools, filt_bycount_bam, path_to_samtools, final_filt_bam))
     os.system('rm -rf unvalids_k1.txt')
 
 

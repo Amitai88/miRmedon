@@ -7,36 +7,38 @@ import os
 import pysam
 
 ################################################### Auxilary functions #############################################
-
-
-def phred_to_prob(asciiChar):
+    
+    
+def qual_to_prob(qual_score):
     """This function takes an ascii character and as an input and returns 
     the error probability"""
-    return 10**(-(ord(asciiChar)-33)/10)
+    return 10**(-qual_score/10)
 
 
-def length_correction(sequences, phred_seqs):
-    corrected_phred_seqs = []
+def length_correction(sequences, qual_lists):
+    if all(isinstance(x, str) for x in qual_lists):
+        qual_lists = [[ord(c)-33 for c in seq] for seq in qual_lists] 
+    corrected_qual_lists = []
     for i in range(len(sequences)):
-        startGap = ''
-        endGap = ''
+        startGapLen = 0
+        endGapLen = 0
         for j in range(len(sequences[i])):
             if sequences[i][j] not in ['A', 'T', 'C', 'G', 'N']:
-                startGap += '~'
+                startGapLen += 1
             else:
                 break
         for j in range(len(sequences[i]))[::-1]:
             if sequences[i][j] not in ['A', 'T', 'C', 'G', 'N']:
-                endGap += '~'
+                endGapLen += 1
             else:
-                break
-        corrected_phred_seqs.append(startGap + phred_seqs[i] + endGap) 
-    return corrected_phred_seqs
+                break 
+        corrected_qual_lists.append([99]*startGapLen + qual_lists[i] + [99]*endGapLen)
+    return corrected_qual_lists
 
 
-def consensus_calculator(sequences, phred_seqs):
+def consensus_calculator(sequences, qual_lists):
     sequences = [seq.upper() for seq in sequences]
-    phred_seqs = length_correction(sequences=sequences, phred_seqs=phred_seqs)
+    qual_lists = length_correction(sequences=sequences, qual_lists=qual_lists)
     index_to_base = {0: 'A', 1: 'T', 2: 'C', 3: 'G', 4: 'N'}
     base_to_index = {'A': 0, 'T': 1, 'C': 2, 'G': 3, 'N':4}
     max_seq_length = len(sequences[0])
@@ -47,7 +49,7 @@ def consensus_calculator(sequences, phred_seqs):
         position_matrix = np.zeros((N_sequences, 5), dtype=object)
         for i in range(N_sequences):
             base = sequences[i][j]
-            error_prob = phred_to_prob(phred_seqs[i][j])
+            error_prob = qual_to_prob(qual_lists[i][j])
             try:
                 position_matrix[i, 4] = Decimal(1e-17)
                 position_matrix[i, base_to_index[base]] = Decimal(1) - Decimal(error_prob)
@@ -90,7 +92,7 @@ def MSAligner(list_of_sequences, path_to_mafft):
 def consensus_generator(filt_bam, path_to_mafft, path_to_samtools):
     only_edited_bam = filt_bam[:filt_bam.find('.bam')] + '.only.edited.bam'
     os.system(
-        "{} view -h {} | grep _e | samtools view -Sb > {}".format(path_to_samtools, filt_bam, only_edited_bam))
+        "{} view -h {} | grep _e | {} view -Sb > {}".format(path_to_samtools, filt_bam, path_to_samtools, only_edited_bam))
     only_edited_sorted_bam = only_edited_bam[:only_edited_bam.find('.bam')] + '.sort.by.miR.bam'
     os.system('{} sort  {} -o {} -O bam'.format(path_to_samtools, only_edited_bam, only_edited_sorted_bam))
     sortedBamFile = pysam.AlignmentFile(only_edited_sorted_bam, 'rb')
@@ -107,12 +109,18 @@ def consensus_generator(filt_bam, path_to_mafft, path_to_samtools):
                 else:
                     ref_name = alignments_list[0].reference_name
                     class_sequences = []
-                    class_phreds = []
+                    class_quals = []
                     for sub_alignment in alignments_list:
-                        class_sequences.append(sub_alignment.query_sequence)
-                        class_phreds.append(sub_alignment.qual)
+                        class_sequences.append(sub_alignment.query_alignment_sequence)
+                        class_quals.append(list(sub_alignment.query_alignment_qualities))
+                        #class_sequences.append(sub_alignment.query_sequence)
+                        #class_quals.append(list(sub_alignment.query_qualities))
+                    if len(class_sequences) > 1e6:
+                        random_indices = np.random.choice(np.arange(len(class_sequences)), 1000)
+                        class_sequences = list(np.array(class_sequences)[random_indices])
+                        class_quals = list(np.array(class_quals)[random_indices])
                     aligned_class_sequences = MSAligner(class_sequences, path_to_mafft=path_to_mafft)
-                    consensus = consensus_calculator(aligned_class_sequences, class_phreds).strip('N')
+                    consensus = consensus_calculator(aligned_class_sequences, class_quals).strip('N')
                     # Write consensus file into a fasta file with all consensus sequences
                     if 'N' not in consensus:
                         fasta_file.write('>' + ref_name + '\n' + consensus + '\n')
@@ -121,12 +129,18 @@ def consensus_generator(filt_bam, path_to_mafft, path_to_samtools):
                     alignments_list = [alignment]
     ref_name = alignments_list[0].reference_name
     class_sequences = []
-    class_phreds = []
+    class_quals = []
     for sub_alignment in alignments_list:
-        class_sequences.append(sub_alignment.query_sequence)
-        class_phreds.append(sub_alignment.qual)
+        class_sequences.append(sub_alignment.query_alignment_sequence)
+        class_quals.append(list(sub_alignment.query_alignment_qualities))
+        #class_sequences.append(sub_alignment.query_sequence)
+        #class_quals.append(sub_alignment.qual)
+    if len(class_sequences) > 1e6:
+        random_indices = np.random.choice(np.arange(len(class_sequences)), 100)
+        class_sequences = list(np.array(class_sequences)[random_indices])
+        class_quals = list(np.array(class_quals)[random_indices])
     aligned_class_sequences = MSAligner(class_sequences, path_to_mafft=path_to_mafft)
-    consensus = consensus_calculator(aligned_class_sequences, class_phreds).strip('N')
+    consensus = consensus_calculator(aligned_class_sequences, class_quals).strip('N')
     # Write consensus file into a fasta file with all consensus sequences
     if 'N' not in consensus:
         fasta_file.write('>' + ref_name + '\n' + consensus + '\n')

@@ -36,7 +36,7 @@ def BAM_filter_counts(st_filt_bam, path_to_samtools):
     filt_bycount_bam = st_filt_bam[:st_filt_bam.find('.filt.st.bam')] + '.filt.bycount.bam'
     os.system('cut -f 1 unvalids.txt > unvalids_k1.txt')
     os.system(
-        "{} view -h {} | grep -v -w -F -f unvalids_k1.txt | samtools view -Sb > {}".format(path_to_samtools, st_filt_bam, filt_bycount_bam))
+        "{} view -h {} | grep -v -w -F -f unvalids_k1.txt | {} view -Sb > {}".format(path_to_samtools, st_filt_bam, path_to_samtools, filt_bycount_bam))
     os.system('rm -rf unvalids_k1.txt')
 
 

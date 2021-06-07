@@ -1,15 +1,17 @@
 import pickle
+import pandas as pd
 
 def recount(e_miRbase_path):
     e_miRbase = pickle.load(open(e_miRbase_path, 'rb'))
+    editing_data = pd.read_csv('editing_info.txt', sep='\t')
     sig_sites = {}
     with open('editing_info.txt', 'r') as file:
         for line in file:
             if not line.startswith('miRNA'):
-                miR, pos, _, _, _, _, _, p_value = line.rstrip('\n').split('\t')
-                p_value = float(p_value)
+                miR, pos, _, _, _, _, _, _, adj_p_value = line.rstrip('\n').split('\t')
+                adj_p_value = float(adj_p_value)
                 pos = int(pos)-1
-                if p_value < 0.05:
+                if adj_p_value <= 0.05:
                     if miR not in sig_sites.keys():
                         sig_sites[miR] = [pos]
                     else:
@@ -57,3 +59,13 @@ def recount(e_miRbase_path):
             put_editing_sites = ', '.join(str(x+1) for x in e_miRbase[miR][haplotype]['editingSites'])
             crt_counts_file.write(haplotype + '\t' + str(count) + '\t' + seq + '\t' + put_editing_sites + '\n')
 
+
+
+import argparse 
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e_miRbase', '-e_miRbase', type=str,
+                        help='Path to e_miRbase.pkl')
+    args = parser.parse_args()  
+    recount(e_miRbase_path=args.e_miRbase)    

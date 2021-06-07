@@ -3,6 +3,9 @@ import pickle
 import numpy as np
 from scipy.stats import beta
 import pysam
+from scipy.stats import binom_test
+import pandas as pd
+from statsmodels.stats.multitest import multipletests
 
 
 def phred_to_prob(asciiChar):
@@ -86,15 +89,17 @@ def get_editing_data(final_filt_bam, path_to_emiRbase):
 def monte_catlo_p_estimation(final_filt_bam, path_to_emiRbase, resamples):
     edited_sites_counts, unedited_sites_counts, haplotypes_counts, error_probs_dict = get_editing_data(final_filt_bam=final_filt_bam,
                                                                                                        path_to_emiRbase=path_to_emiRbase)
-    editing_data_file = open('editing_info.txt', 'w')
-    editing_data_file.write(
-            'miRNA' + '\t' + 'position' + '\t' + 'edited' + '\t' + 'unedited' + '\t' + 
-            'editing_level' + '\t' + 'LCI' + '\t' 'UCI' + '\t' + 'p_value' + '\n')
+#    editing_data_file = open('editing_info.txt', 'w')
+#    editing_data_file.write(
+#            'miRNA' + '\t' + 'position' + '\t' + 'edited' + '\t' + 'unedited' + '\t' + 
+#            'editing_level' + '\t' + 'LCI' + '\t' 'UCI' + '\t' + 'p_value' + '\n')
+    columns = ['miRNA', 'position', 'edited', 'unedited', 'editing_level', 'LCI', 'UCI', 'p_value']
+    editing_data = pd.DataFrame(columns=columns)
     edited_miRs = list(set(edited_sites_counts.keys()))
     editing_rates_dict = {}
-    p_values_dict = {}
+#    p_values_dict = {}
     for miRNA in edited_miRs:
-        p_values_dict[miRNA] = {}
+#        p_values_dict[miRNA] = {}
         editing_rates_dict[miRNA] = {}
         for position in list(edited_sites_counts[miRNA].keys()):
             edited_count = edited_sites_counts[miRNA][position]
@@ -109,10 +114,30 @@ def monte_catlo_p_estimation(final_filt_bam, path_to_emiRbase, resamples):
             ext_error_probs = np.random.choice(error_probs, resamples)
             arraySubtraction = bootstrap_beta - ext_error_probs
             positive = len(arraySubtraction[arraySubtraction <= 0])
-            p_value = (positive+1)/(resamples+1)
-            p_values_dict[miRNA][position] = p_value
+            if positive == 0:
+                p_value = binom_test(x=edited_count, n=edited_count+unedited_count, p=np.max(error_probs), alternative='greater')
+            else:
+                p_value = (positive+1)/(resamples+1)
+#            p_values_dict[miRNA][position] = p_value
             editing_rate = beta_dist.mean()
             editing_rates_dict[miRNA][position] = editing_rate
-            editing_data_file.write(
-                    miRNA + '\t' + str(position+1) + '\t' + str(edited_count) + '\t' + str(unedited_count) + '\t' +
-                    str(editing_rate) + '\t' + str(LCI) + '\t' + str(UCI) + '\t' + str(p_values_dict[miRNA][position]) + '\n')
+            editing_data = editing_data.append(dict(zip(columns, [miRNA, position+1, edited_count, unedited_count, editing_rate, LCI, UCI, p_value])), ignore_index=True)
+#            editing_data_file.write(
+#                    miRNA + '\t' + str(position+1) + '\t' + str(edited_count) + '\t' + str(unedited_count) + '\t' +
+#                    str(editing_rate) + '\t' + str(LCI) + '\t' + str(UCI) + '\t' + str(p_values_dict[miRNA][position]) + '\n')
+    editing_data['adj_p_value'] = multipletests(editing_data['p_value'], method='fdr_bh')[1]
+    editing_data.to_csv('editing_info.txt', sep='\t', index=False)
+
+
+import argparse
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '-final_filt_bam', type=str,
+                        help='Path to fastq file')
+    parser.add_argument('-r', '-resamples', type=int, default=10000,
+                        help='Number of resamples for Monte-Carlo p-value estimation')
+    parser.add_argument('-e_miRbase', '-e_miRbase', type=str,
+                        help='Path to e_miRbase.pkl')
+    args = parser.parse_args()  
+    monte_catlo_p_estimation(final_filt_bam=args.f, path_to_emiRbase=args.e_miRbase, resamples=args.r)    
