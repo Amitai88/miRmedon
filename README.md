@@ -25,6 +25,8 @@ or
 - pysam - https://pysam.readthedocs.io/en/latest/api.html 
 - numpy 
 - scipy
+- pandas 
+- statsmodels
 
 **Reference genome and transcriptome:**
 - GRCh38.p12 - ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_31/GRCh38.p12.genome.fa.gz
