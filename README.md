@@ -2,11 +2,11 @@
 Confident detection of A-to-I miRNA editing events in small-RNA seq data
 
 # Description
-miRmedon it's a python3 code which takes fastq file of trimmed small-RNA reads, and reports on A-to-I editing events 
-detected in the data. In addition, miRmedon reports on read counts and sequence of both edited and non-edited miRNAs. 
+miRmedon is a framework for miRNA editing detetion which takes fastq file of trimmed small-RNA reads, and reports A-to-I editing events 
+detected in the data. In addition, miRmedon reports read counts and sequence of both edited and non-edited miRNAs. 
 miRmedon require several extrenal softwares and python libraries, as descirbed below.
 
-For detailed description see https://www.biorxiv.org/content/10.1101/774661v1
+For detailed description and results on miRNA detection in the human brain please refer to https://www.biorxiv.org/content/10.1101/2022.12.23.521716v1
 
 # Installation
 No installation is required for miRmedon. Please directly use miRmedon.py source file and make sure it is located within the  
